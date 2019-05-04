@@ -42,7 +42,7 @@ class BasicRSI(StrategyBase):
             self.short()
 
         if self.last_operation != "BUY":
-            if self.rsi < 35 and self.sma_fast > self.sma_slow:
+            if self.rsi < 30 and self.sma_fast > self.sma_slow:
                 self.long()
 
 

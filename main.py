@@ -60,7 +60,7 @@ def main():
             name='%s%s' % (COIN_TARGET, COIN_REFER),
             timeframe=bt.TimeFrame.Minutes,
             fromdate=hist_start_date,
-            compression=1,
+            compression=60,
             ohlcv_limit=None
         )
 
