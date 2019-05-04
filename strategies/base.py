@@ -25,7 +25,7 @@ class StrategyBase(bt.Strategy):
 
     def notify_data(self, data, status, *args, **kwargs):
         self.status = data._getstatusname(status)
-        print(self.status)
+        print('stratege status:',self.status)
         if status == data.LIVE:
             self.log("LIVE DATA - Ready to trade")
 
@@ -58,7 +58,7 @@ class StrategyBase(bt.Strategy):
         amount = (value / price) * 0.99
         self.log("Buy ordered: $%.2f. Amount %.6f %s. Ballance $%.2f USDT" % (self.data0.close[0],
                                                                               amount, COIN_TARGET, value), True)
-        return self.buy(size=amount)
+        return self.buy(size=amount,exectype=bt.Order.Limit,price=self.buy_price_close)
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -71,20 +71,22 @@ class StrategyBase(bt.Strategy):
             self.log('BUY EXPIRED', True)
 
         elif order.status in [order.Completed]:
+            #print(order.ordtype ,self.last_operation)
             if order.isbuy():
                 self.last_operation = "BUY"
                 self.log(
-                    'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
+                    'BUY EXECUTED, Price: %.6f, Cost: %.6f, Comm %.6f' %
                     (order.executed.price,
                      order.executed.value,
                      order.executed.comm), True)
-                if ENV == PRODUCTION:
-                    print(order.__dict__)
+                # if ENV == PRODUCTION:
+                #     print(order.__dict__)
+                #     print(order.executed)
 
             else:  # Sell
                 self.last_operation = "SELL"
                 self.reset_sell_indicators()
-                self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
+                self.log('SELL EXECUTED, Price: %.6f, Cost: %.6f, Comm %.6f' %
                          (order.executed.price,
                           order.executed.value,
                           order.executed.comm), True)
@@ -107,8 +109,8 @@ class StrategyBase(bt.Strategy):
         self.log(colored('OPERATION PROFIT, GROSS %.2f, NET %.2f' % (trade.pnl, trade.pnlcomm), color), True)
 
     def log(self, txt, send_telegram=False, color=None):
-        if not DEBUG:
-            return
+        # if not DEBUG:
+        #     return
 
         value = datetime.now()
         if len(self) > 0:

@@ -27,6 +27,8 @@ class BasicRSI(StrategyBase):
     def next(self):
         self.update_indicators()
 
+        #print('rsi:',self.rsi[0],self.sma_fast[0],self.sma_slow[0])
+
         if self.status != "LIVE" and ENV == PRODUCTION:
             self.log("%s - $%.2f" % (self.status, self.data0.close[0]))
             return
@@ -40,8 +42,9 @@ class BasicRSI(StrategyBase):
             self.short()
 
         if self.last_operation != "BUY":
-            if self.rsi < 30 and self.sma_fast > self.sma_slow:
+            if self.rsi < 35 and self.sma_fast > self.sma_slow:
                 self.long()
+
 
         if self.last_operation != "SELL":
             if self.rsi > 70:
