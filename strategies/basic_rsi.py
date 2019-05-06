@@ -26,6 +26,7 @@ class BasicRSI(StrategyBase):
 
     def next(self):
         self.update_indicators()
+        print('next')
 
         #print('rsi:',self.rsi[0],self.sma_fast[0],self.sma_slow[0])
 
@@ -42,11 +43,11 @@ class BasicRSI(StrategyBase):
             self.short()
 
         if self.last_operation != "BUY":
-            if self.rsi < 30 and self.sma_fast > self.sma_slow:
+            #if self.rsi < 30 and self.sma_fast > self.sma_slow:
                 self.long()
 
 
         if self.last_operation != "SELL":
-            if self.rsi > 70:
+            #if self.rsi > 70:
                 self.short()
 

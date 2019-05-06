@@ -45,29 +45,40 @@ def main():
             }
         }
 
-        broker = store.getbroker(broker_mapping=broker_mapping)
-        print( broker.getcash(),broker.getvalue() )
+        okex = store.getbroker(broker_mapping=broker_mapping)
+        print( okex.getcash(),okex.getvalue() )
 
-        cerebro.setbroker(broker)
+        #cerebro.setbroker(okex)
+
+        broker = cerebro.getbroker()
+        broker.setcommission( commission=0.001, name=COIN_TARGET )
+        broker.setcash( 100000.0 )
+        cerebro.addsizer( FullMoney )
 
         initial_value = cerebro.broker.getvalue()
         print( 'Starting Portfolio Value: %.2f' % initial_value )
 
 
+        import datetime
         hist_start_date = dt.datetime.utcnow() - dt.timedelta(minutes=30000)
         data = store.getdata(
             dataname='%s/%s' % (COIN_TARGET, COIN_REFER),
             name='%s%s' % (COIN_TARGET, COIN_REFER),
             timeframe=bt.TimeFrame.Minutes,
-            fromdate=hist_start_date,
-            compression=60,
+            #fromdate=hist_start_date,
+            fromdate=datetime.datetime( 2018, 1, 1 ),
+            todate=datetime.datetime( 2018, 12, 31 ),
+            compression=15,
             ohlcv_limit=None
         )
 
         # Add the feed
-        cerebro.adddata(data)
+        #cerebro.adddata(data)
+        cerebro.resampledata( data, timeframe=bt.TimeFrame.Minutes, compression=30 )
 
     else:  # Backtesting with CSV file
+        import onetoken
+
         data = CustomDataset(
             name=COIN_TARGET,
             dataname="dataset/binance_nov_18_mar_19_btc.csv",
