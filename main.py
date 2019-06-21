@@ -7,9 +7,9 @@ import datetime as dt
 from ccxtbt import CCXTStore
 from config import BINANCE, ENV, PRODUCTION, COIN_TARGET, COIN_REFER, DEBUG
 
-from dataset.dataset import CustomDataset
+from dataset.dataset import CustomDataset,OneTokenDataset
 from sizer.percent import FullMoney
-from strategies.basic_rsi import BasicRSI
+from strategies.random import BasicRandom
 from utils import print_trade_analysis, print_sqn, send_telegram_message
 import os
 
@@ -59,15 +59,15 @@ def main():
         print( 'Starting Portfolio Value: %.2f' % initial_value )
 
 
-        import datetime
+
         hist_start_date = dt.datetime.utcnow() - dt.timedelta(minutes=30000)
         data = store.getdata(
             dataname='%s/%s' % (COIN_TARGET, COIN_REFER),
             name='%s%s' % (COIN_TARGET, COIN_REFER),
             timeframe=bt.TimeFrame.Minutes,
             #fromdate=hist_start_date,
-            fromdate=datetime.datetime( 2018, 1, 1 ),
-            todate=datetime.datetime( 2018, 12, 31 ),
+            fromdate=dt.datetime( 2018, 1, 1 ),
+            todate=dt.datetime( 2018, 12, 31 ),
             compression=15,
             ohlcv_limit=None
         )
@@ -77,22 +77,23 @@ def main():
         cerebro.resampledata( data, timeframe=bt.TimeFrame.Minutes, compression=30 )
 
     else:  # Backtesting with CSV file
-        import onetoken
-
-        data = CustomDataset(
-            name=COIN_TARGET,
-            dataname="dataset/binance_nov_18_mar_19_btc.csv",
+        data = OneTokenDataset(
+            name='btc',
+            dataname="dataset/candles_okef_btc.usd.t_2018-11-11_2018-12-12_5m.csv",
             timeframe=bt.TimeFrame.Minutes,
-            fromdate=dt.datetime(2018, 9, 20),
-            todate=dt.datetime(2019, 3, 13),
-            nullvalue=0.0
+            #fromdate=dt.datetime(2018, 11, 11,11,11),
+            #todate=dt.datetime(2018, 11, 10,11,11),
+            compression = 5,
+            nullvalue=0.0,
+            dtformat = 1,
         )
 
-        cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes, compression=30)
+        cerebro.adddata(data)
+        #cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes, compression=5)
 
         broker = cerebro.getbroker()
         broker.setcommission(commission=0.001, name=COIN_TARGET)
-        broker.setcash(100000.0)
+        broker.setcash(10000.0)
         cerebro.addsizer(FullMoney)
 
     # Analyzers to evaluate trades and strategies
@@ -101,7 +102,7 @@ def main():
     cerebro.addanalyzer(bt.analyzers.SQN, _name="sqn")
 
     # Include Strategy
-    cerebro.addstrategy(BasicRSI)
+    cerebro.addstrategy(BasicRandom)
 
     # Print analyzers - results
     initial_value = cerebro.broker.getvalue()
@@ -113,6 +114,7 @@ def main():
     print('Final Portfolio Value: %.2f' % final_value)
     print('Profit %.3f%%' % ((final_value - initial_value) / initial_value * 100))
 
+    #exit()
     print_trade_analysis(result[0].analyzers.ta.get_analysis())
     print_sqn(result[0].analyzers.sqn.get_analysis())
 

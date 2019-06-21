@@ -39,7 +39,6 @@ def download(url, file_path):
             total += len(data) / 1024
             print('downloaded {}kb'.format(round(total)))
 
-
 def download_simple_ticks(contract, date, file_path):
     url = 'http://hist-quote.1tokentrade.cn/ticks/simple?date={}&contract={}'.format(date, contract)
     download(url, file_path)
@@ -60,7 +59,7 @@ def download_and_print_candles(contract, since, until, duration):
     url = 'http://hist-quote.1tokentrade.cn/candles?since={}&until={}&contract={}&duration={}&format=csv'.format(
         since, until, contract, duration)
 
-    file_path = 'dataset/okex.csv'.format(since, until, contract, duration)
+    file_path = 'dataset/'+'candles_{}_{}_{}_{}.csv'.format(contract,since, until,  duration).replace('/','_')
     download(url,file_path)
 
     # print('downloading', url)
@@ -90,6 +89,7 @@ def unzip_and_read(path, rate):
         except:
             pass
 
+    print()
 
 def load_otkey():
     path = os.path.expanduser('~/.onetoken/config.yml')
@@ -106,7 +106,7 @@ def load_otkey():
 
 def main():
     date = '2018-11-11'
-    contract = 'okex/eos.eth'
+    contract = 'okef/btc.usd.t'
 
     #simple tick
     # get_contracts(date, 'ticks')
@@ -119,16 +119,16 @@ def main():
     # download_full_ticks(contract, date, file_path)
     # unzip_and_read('tick-full-2018-11-11-okex-eos.eth.gz', 0.0001)
 
-    # #zhubi
+    #zhubi
     # get_contracts(date, 'trades')
     # file_path = 'dataset/zhubi-{}-{}.gz'.format(date, contract.replace('/', '-'))
     # download_zhubis(contract, date, file_path)
-    # unzip_and_read('zhubi-2018-11-11-okex-eos.eth.gz', 0.001)
+    # unzip_and_read('dataset/zhubi-2018-11-11-okex-eos.eth.gz', 0.001)
 
     #candle
     since = date
-    until = '2018-11-12'
-    download_and_print_candles(contract, since, until, '1m')
+    until = '2018-12-12'
+    download_and_print_candles(contract, since, until, '5m')
 
 
 if __name__ == '__main__':

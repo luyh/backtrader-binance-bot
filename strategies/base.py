@@ -14,6 +14,7 @@ class StrategyBase(bt.Strategy):
         self.status = "DISCONNECTED"
         self.bar_executed = 0
         self.buy_price_close = None
+        self.trade_price = None
         self.soft_sell = False
         self.hard_sell = False
         self.log("Base strategy initialized")
@@ -29,13 +30,17 @@ class StrategyBase(bt.Strategy):
         if status == data.LIVE:
             self.log("LIVE DATA - Ready to trade")
 
-    def short(self):
+    def short(self,size):
         if self.last_operation == "SELL":
             return
 
         if ENV == DEVELOPMENT:
             self.log("Sell ordered: $%.2f" % self.data0.close[0])
-            return self.sell()
+            self.trade_price = self.data0.close[0]
+            print(self.trade_price)
+            return self.sell(size = size)
+
+
 
         cash, value = self.broker.get_wallet_balance(COIN_TARGET)
         amount = value*0.99
@@ -43,22 +48,23 @@ class StrategyBase(bt.Strategy):
                                                                        amount, COIN_TARGET, value), True)
         return self.sell(size=amount)
 
-    def long(self):
+    def long(self,size):
         if self.last_operation == "BUY":
             return
 
         self.log("Buy ordered: $%.2f" % self.data0.close[0], True)
         self.buy_price_close = self.data0.close[0]
+        self.trade_price = self.data0.close[0]
         price = self.data0.close[0]
 
         if ENV == DEVELOPMENT:
-            return self.buy()
+            return self.buy(size=size,price=self.buy_price_close)
 
-        cash, value = self.broker.get_wallet_balance(COIN_REFER)
-        amount = (value / price) * 0.99
-        self.log("Buy ordered: $%.2f. Amount %.6f %s. Ballance $%.2f USDT" % (self.data0.close[0],
-                                                                              amount, COIN_TARGET, value), True)
-        return self.buy(size=amount,exectype=bt.Order.Limit,price=self.buy_price_close)
+        # cash, value = self.broker.get_wallet_balance(COIN_REFER)
+        # amount = (value / price) * 0.99
+        # self.log("Buy ordered: $%.2f. Amount %.6f %s. Ballance $%.2f USDT" % (self.data0.close[0],
+        #                                                                       amount, COIN_TARGET, value), True)
+        return self.buy(size=size,price=self.buy_price_close)
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:

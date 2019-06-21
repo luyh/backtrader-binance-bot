@@ -1,6 +1,6 @@
 import backtrader as bt
-
-
+import itertools
+import datetime
 class CustomDataset(bt.feeds.GenericCSVData):
     params = (
         ('time', -1),
@@ -12,3 +12,16 @@ class CustomDataset(bt.feeds.GenericCSVData):
         ('volume', 5),
         ('openinterest', 6),
     )
+
+class OneTokenDataset(bt.feeds.GenericCSVData):
+    params = (
+        ('time', -1),
+        ('datetime', 4),
+        ('open', 3),
+        ('high', 1),
+        ('low', 2),
+        ('close', 0),
+        ('volume', 5),
+        ('openinterest', -1),
+    )
+
